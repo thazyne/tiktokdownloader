@@ -85,11 +85,11 @@
       </button>
     </div>
 
-    <p id="status" class="text-white text-sm mt-4 hidden text-center">Processing...</p>
+    <p id="status" class="text-white text-sm mt-4 hidden text-center">Tunggu sbntr...</p>
 
     <!-- Preview Video -->
     <div id="previewContainer" class="hidden mt-4">
-      <p class="text-white mb-2 text-sm">Video Preview:</p>
+      <p class="text-white mb-2 text-sm">Pratinjau Video:</p>
       <video id="videoPreview" controls class="w-full rounded-xl shadow-lg"></video>
     </div>
   </div>
@@ -102,7 +102,7 @@
       const videoPreview = document.getElementById("videoPreview");
 
       statusText.classList.remove("hidden");
-      statusText.textContent = "Fetching video...";
+      statusText.textContent = "Mengambil video...";
       previewContainer.classList.add("hidden");
 
       const options = {
@@ -119,7 +119,7 @@
         const videoUrl = response.data.video[0];
         videoPreview.src = videoUrl;
         previewContainer.classList.remove("hidden");
-        statusText.textContent = "Preview ready. Video will download now.";
+        statusText.textContent = "Pratinjau siap. Video mw diunduh skrg gng.";
 
         // Auto download video
         const xhr = new XMLHttpRequest();
@@ -133,12 +133,12 @@
           a.download = 'tiktok_video.mp4';
           a.click();
           window.URL.revokeObjectURL(downloadUrl);
-          statusText.textContent = "✅ Video Download complete!";
+          statusText.textContent = "✅ Selesai!";
         };
         xhr.send();
       }).catch(function (error) {
         console.error(error);
-        statusText.textContent = "❌ Failed to get video. Check URL.";
+        statusText.textContent = "❌ gabisa dapetin videonya. Check dl urlnya .";
       });
     }
 
@@ -146,7 +146,7 @@
       const url = document.getElementById("url").value;
       const statusText = document.getElementById("status");
       statusText.classList.remove("hidden");
-      statusText.textContent = "Fetching audio...";
+      statusText.textContent = "Mengambil audio...";
 
       const options = {
         method: 'GET',
@@ -162,7 +162,7 @@
         const audioUrl = response.data.music;
 
         if (!audioUrl) {
-          statusText.textContent = "❌ Audio not available for this video.";
+          statusText.textContent = "❌ audio ini gk tersedia, sybau gng.";
           return;
         }
 
@@ -177,12 +177,12 @@
           a.download = 'tiktok_audio.mp3';
           a.click();
           window.URL.revokeObjectURL(downloadUrl);
-          statusText.textContent = "✅ MP3 Download complete!";
+          statusText.textContent = "✅ MP3 kelar bg!";
         };
         xhr.send();
       }).catch(function (error) {
         console.error(error);
-        statusText.textContent = "❌ Failed to get audio. Check URL.";
+        statusText.textContent = "❌ gabisa dapetin audionya. Periksa URL.";
       });
     }
   </script>
