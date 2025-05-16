@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TikTok Downloader - Aero Edition</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Lunasima:wght@400;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Lunasima', sans-serif;
+      background: url('https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/07ac4730-10a5-494f-a7ba-bf9290179403/dh769p8-8425a0ca-7912-4d44-8cbd-3db872286b09.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzA3YWM0NzMwLTEwYTUtNDk0Zi1hN2JhLWJmOTI5MDE3OTQwM1wvZGg3NjlwOC04NDI1YTBjYS03OTEyLTRkNDQtOGNiZC0zZGI4NzIyODZiMDkucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.qihyhIor-UfzU_Zn3k2iKoYTkd5x6dLDik2YwVc2DvM') no-repeat center center fixed;
+      background-size: cover;
+      backdrop-filter: blur(2px);
+    }
+
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+      border-radius: 20px;
+    }
+
+    .aero-button {
+      background: linear-gradient(to bottom, #c9f0ff, #72c6ff);
+      border: 1px solid #5ab2ff;
+      border-radius: 12px;
+      box-shadow: inset 0 0 0.5px white, 0 3px 5px rgba(0, 0, 0, 0.2);
+      transition: all 0.2s;
+    }
+
+    .aero-button:hover {
+      background: linear-gradient(to bottom, #d8f6ff, #90d4ff);
+      transform: scale(1.02);
+    }
+
+    .glass-input {
+      background: rgba(255, 255, 255, 0.6);
+      border: 1px solid #90d4ff;
+      border-radius: 10px;
+      padding: 10px;
+      outline: none;
+      width: 100%;
+    }
+
+    .glass-input:focus {
+      box-shadow: 0 0 5px #90d4ff;
+      background: rgba(255, 255, 255, 0.8);
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen px-4">
+
+  <div class="glass-panel p-8 max-w-md w-full">
+    <h1 class="text-3xl font-bold text-white text-center mb-6 drop-shadow"> TikTok Downloader </h1>
+
+    <div class="mb-4">
+      <label for="url" class="text-white text-sm font-semibold drop-shadow">TikTok Video URL</label>
+      <input
+        type="text"
+        id="url"
+        placeholder="https://www.tiktok.com/..."
+        class="glass-input mt-1"
+      />
+    </div>
+
+    <!-- Tombol Download MP4 & MP3 -->
+    <div class="flex gap-2 mt-4">
+      <button
+        onclick="downloadVideo()"
+        class="aero-button w-1/2 py-2 text-white font-semibold text-lg"
+      >
+        🚀 Download MP4
+      </button>
+
+      <button
+        onclick="downloadAudio()"
+        class="aero-button w-1/2 py-2 text-white font-semibold text-lg"
+      >
+        🎵 Download MP3
+      </button>
+    </div>
+
+    <p id="status" class="text-white text-sm mt-4 hidden text-center">Processing...</p>
+
+    <!-- Preview Video -->
+    <div id="previewContainer" class="hidden mt-4">
+      <p class="text-white mb-2 text-sm">Video Preview:</p>
+      <video id="videoPreview" controls class="w-full rounded-xl shadow-lg"></video>
+    </div>
+  </div>
+
+  <script>
+    function downloadVideo() {
+      const url = document.getElementById("url").value;
+      const statusText = document.getElementById("status");
+      const previewContainer = document.getElementById("previewContainer");
+      const videoPreview = document.getElementById("videoPreview");
+
+      statusText.classList.remove("hidden");
+      statusText.textContent = "Fetching video...";
+      previewContainer.classList.add("hidden");
+
+      const options = {
+        method: 'GET',
+        url: 'https://tiktok-downloader-download-tiktok-videos-without-watermark.p.rapidapi.com/vid/index',
+        params: { url: url },
+        headers: {
+          'X-RapidAPI-Key': 'b9ab437e9amshd1177093a109ec5p19a1f3jsnbd62e18af13a',
+          'X-RapidAPI-Host': 'tiktok-downloader-download-tiktok-videos-without-watermark.p.rapidapi.com'
+        }
+      };
+
+      axios.request(options).then(function (response) {
+        const videoUrl = response.data.video[0];
+        videoPreview.src = videoUrl;
+        previewContainer.classList.remove("hidden");
+        statusText.textContent = "Preview ready. Video will download now.";
+
+        // Auto download video
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', videoUrl, true);
+        xhr.responseType = 'blob';
+        xhr.onload = function () {
+          const blob = xhr.response;
+          const downloadUrl = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = downloadUrl;
+          a.download = 'tiktok_video.mp4';
+          a.click();
+          window.URL.revokeObjectURL(downloadUrl);
+          statusText.textContent = "✅ Video Download complete!";
+        };
+        xhr.send();
+      }).catch(function (error) {
+        console.error(error);
+        statusText.textContent = "❌ Failed to get video. Check URL.";
+      });
+    }
+
+    function downloadAudio() {
+      const url = document.getElementById("url").value;
+      const statusText = document.getElementById("status");
+      statusText.classList.remove("hidden");
+      statusText.textContent = "Fetching audio...";
+
+      const options = {
+        method: 'GET',
+        url: 'https://tiktok-downloader-download-tiktok-videos-without-watermark.p.rapidapi.com/vid/index',
+        params: { url: url },
+        headers: {
+          'X-RapidAPI-Key': 'b9ab437e9amshd1177093a109ec5p19a1f3jsnbd62e18af13a',
+          'X-RapidAPI-Host': 'tiktok-downloader-download-tiktok-videos-without-watermark.p.rapidapi.com'
+        }
+      };
+
+      axios.request(options).then(function (response) {
+        const audioUrl = response.data.music;
+
+        if (!audioUrl) {
+          statusText.textContent = "❌ Audio not available for this video.";
+          return;
+        }
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', audioUrl, true);
+        xhr.responseType = 'blob';
+        xhr.onload = function () {
+          const blob = xhr.response;
+          const downloadUrl = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = downloadUrl;
+          a.download = 'tiktok_audio.mp3';
+          a.click();
+          window.URL.revokeObjectURL(downloadUrl);
+          statusText.textContent = "✅ MP3 Download complete!";
+        };
+        xhr.send();
+      }).catch(function (error) {
+        console.error(error);
+        statusText.textContent = "❌ Failed to get audio. Check URL.";
+      });
+    }
+  </script>
+</body>
+</html>
