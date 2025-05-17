@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>TikTok Downloader - Aero Edition</title>
+  <title>TikTok Downloader</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Lunasima:wght@400;700&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-
   <style>
     body {
       font-family: 'Lunasima', sans-serif;
@@ -51,14 +50,25 @@
       box-shadow: 0 0 5px #90d4ff;
       background: rgba(255, 255, 255, 0.8);
     }
+
+    .step {
+      transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    }
   </style>
 </head>
 <body class="flex items-center justify-center min-h-screen px-4">
-
   <div class="glass-panel p-8 max-w-md w-full">
-    <h1 class="text-3xl font-bold text-white text-center mb-6 drop-shadow"> TikTok Downloader </h1>
+    <h1 class="text-3xl font-bold text-white text-center mb-6 drop-shadow">TikTok Downloader</h1>
 
-    <div class="mb-4">
+    <!-- Step Indicator -->
+    <div class="flex justify-between items-center mb-6 text-white text-sm font-semibold">
+      <div id="step1Indicator" class="text-blue-200">1. Masukkan URL</div>
+      <div id="step2Indicator" class="text-gray-400">2. Memproses</div>
+      <div id="step3Indicator" class="text-gray-400">3. Download</div>
+    </div>
+
+    <!-- STEP 1 -->
+    <div id="step1" class="step">
       <label for="url" class="text-white text-sm font-semibold drop-shadow">TikTok Video URL</label>
       <input
         type="text"
@@ -66,44 +76,54 @@
         placeholder="https://www.tiktok.com/..."
         class="glass-input mt-1"
       />
-    </div>
-
-    <!-- Tombol Download MP4 & MP3 -->
-    <div class="flex gap-2 mt-4">
       <button
-        onclick="downloadVideo()"
-        class="aero-button w-1/2 py-2 text-white font-semibold text-lg"
+        onclick="startFetch()"
+        class="aero-button w-full py-2 text-white font-semibold text-lg mt-4"
       >
-        🚀 Download MP4
-      </button>
-
-      <button
-        onclick="downloadAudio()"
-        class="aero-button w-1/2 py-2 text-white font-semibold text-lg"
-      >
-        🎵 Download MP3
+        ➡️ Lanjutkan
       </button>
     </div>
 
-    <p id="status" class="text-white text-sm mt-4 hidden text-center">Tunggu sbntr...</p>
+    <!-- STEP 2: Fetching -->
+    <div id="step2" class="step hidden text-center">
+      <p class="text-white mb-2">Mengambil data dari TikTok...</p>
+      <div class="animate-spin rounded-full h-10 w-10 border-t-4 border-white mx-auto mb-2"></div>
+      <p id="status" class="text-white text-sm">Mohon tunggu sebentar...</p>
+    </div>
 
-    <!-- Preview Video -->
-    <div id="previewContainer" class="hidden mt-4">
-      <p class="text-white mb-2 text-sm">Pratinjau Video:</p>
-      <video id="videoPreview" controls class="w-full rounded-xl shadow-lg"></video>
+    <!-- STEP 3: Result & Download -->
+    <div id="step3" class="step hidden">
+      <p class="text-white text-sm mb-2">Pratinjau Video:</p>
+      <video id="videoPreview" controls class="w-full rounded-xl shadow-lg mb-4"></video>
+
+      <div class="flex gap-2">
+        <button onclick="downloadVideoNow()" class="aero-button w-1/2 py-2 text-white font-semibold text-lg">
+          🎬 MP4
+        </button>
+        <button onclick="downloadAudioNow()" class="aero-button w-1/2 py-2 text-white font-semibold text-lg">
+          🎵 MP3
+        </button>
+      </div>
     </div>
   </div>
 
   <script>
-    function downloadVideo() {
-      const url = document.getElementById("url").value;
-      const statusText = document.getElementById("status");
-      const previewContainer = document.getElementById("previewContainer");
-      const videoPreview = document.getElementById("videoPreview");
+    let cachedResponse = null;
 
-      statusText.classList.remove("hidden");
-      statusText.textContent = "Mengambil video...";
-      previewContainer.classList.add("hidden");
+    function updateStepper(current) {
+      const indicators = ["step1", "step2", "step3"];
+      indicators.forEach((id, index) => {
+        document.getElementById(id).classList.add("hidden");
+        document.getElementById(`${id}Indicator`).classList.remove("text-blue-200", "text-gray-400");
+        document.getElementById(`${id}Indicator`).classList.add(index === current ? "text-blue-200" : "text-gray-400");
+      });
+      document.getElementById(`step${current + 1}`).classList.remove("hidden");
+    }
+
+    function startFetch() {
+      const url = document.getElementById("url").value;
+      if (!url) return alert("URL tidak boleh kosong!");
+      updateStepper(1);
 
       const options = {
         method: 'GET',
@@ -116,74 +136,54 @@
       };
 
       axios.request(options).then(function (response) {
-        const videoUrl = response.data.video[0];
-        videoPreview.src = videoUrl;
-        previewContainer.classList.remove("hidden");
-        statusText.textContent = "Pratinjau siap. Video mw diunduh skrg gng.";
-
-        // Auto download video
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', videoUrl, true);
-        xhr.responseType = 'blob';
-        xhr.onload = function () {
-          const blob = xhr.response;
-          const downloadUrl = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = downloadUrl;
-          a.download = 'tiktok_video.mp4';
-          a.click();
-          window.URL.revokeObjectURL(downloadUrl);
-          statusText.textContent = "✅ Selesai!";
-        };
-        xhr.send();
+        cachedResponse = response.data;
+        document.getElementById("videoPreview").src = response.data.video[0];
+        updateStepper(2);
       }).catch(function (error) {
         console.error(error);
-        statusText.textContent = "❌ gabisa dapetin videonya. Check dl urlnya .";
+        alert("Gagal mengambil video. Periksa URL-nya.");
+        updateStepper(0);
       });
     }
 
-    function downloadAudio() {
-      const url = document.getElementById("url").value;
-      const statusText = document.getElementById("status");
-      statusText.classList.remove("hidden");
-      statusText.textContent = "Mengambil audio...";
+    function downloadVideoNow() {
+      if (!cachedResponse) return;
+      const videoUrl = cachedResponse.video[0];
 
-      const options = {
-        method: 'GET',
-        url: 'https://tiktok-downloader-download-tiktok-videos-without-watermark.p.rapidapi.com/vid/index',
-        params: { url: url },
-        headers: {
-          'X-RapidAPI-Key': 'b9ab437e9amshd1177093a109ec5p19a1f3jsnbd62e18af13a',
-          'X-RapidAPI-Host': 'tiktok-downloader-download-tiktok-videos-without-watermark.p.rapidapi.com'
-        }
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', videoUrl, true);
+      xhr.responseType = 'blob';
+      xhr.onload = function () {
+        const blob = xhr.response;
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = 'tiktok_video.mp4';
+        a.click();
+        window.URL.revokeObjectURL(downloadUrl);
       };
+      xhr.send();
+    }
 
-      axios.request(options).then(function (response) {
-        const audioUrl = response.data.music;
+    function downloadAudioNow() {
+      if (!cachedResponse) return;
+      const audioUrl = cachedResponse.music;
 
-        if (!audioUrl) {
-          statusText.textContent = "❌ audio ini gk tersedia, sybau gng.";
-          return;
-        }
+      if (!audioUrl) return alert("Audio tidak tersedia.");
 
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', audioUrl, true);
-        xhr.responseType = 'blob';
-        xhr.onload = function () {
-          const blob = xhr.response;
-          const downloadUrl = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = downloadUrl;
-          a.download = 'tiktok_audio.mp3';
-          a.click();
-          window.URL.revokeObjectURL(downloadUrl);
-          statusText.textContent = "✅ MP3 kelar bg!";
-        };
-        xhr.send();
-      }).catch(function (error) {
-        console.error(error);
-        statusText.textContent = "❌ gabisa dapetin audionya. Periksa URL.";
-      });
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', audioUrl, true);
+      xhr.responseType = 'blob';
+      xhr.onload = function () {
+        const blob = xhr.response;
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = 'tiktok_audio.mp3';
+        a.click();
+        window.URL.revokeObjectURL(downloadUrl);
+      };
+      xhr.send();
     }
   </script>
 </body>
