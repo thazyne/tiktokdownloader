@@ -1,190 +1,573 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>TikTok Downloader</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Lunasima:wght@400;700&display=swap" rel="stylesheet" />
-  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-  <style>
-    body {
-      font-family: 'Lunasima', sans-serif;
-      background: url('https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/07ac4730-10a5-494f-a7ba-bf9290179403/dh769p8-8425a0ca-7912-4d44-8cbd-3db872286b09.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzA3YWM0NzMwLTEwYTUtNDk0Zi1hN2JhLWJmOTI5MDE3OTQwM1wvZGg3NjlwOC04NDI1YTBjYS03OTEyLTRkNDQtOGNiZC0zZGI4NzIyODZiMDkucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.qihyhIor-UfzU_Zn3k2iKoYTkd5x6dLDik2YwVc2DvM') no-repeat center center fixed;
-      background-size: cover;
-      backdrop-filter: blur(2px);
-    }
-
-    .glass-panel {
-      background: rgba(255, 255, 255, 0.25);
-      border: 1px solid rgba(255, 255, 255, 0.4);
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-      border-radius: 20px;
-    }
-
-    .aero-button {
-      background: linear-gradient(to bottom, #c9f0ff, #72c6ff);
-      border: 1px solid #5ab2ff;
-      border-radius: 12px;
-      box-shadow: inset 0 0 0.5px white, 0 3px 5px rgba(0, 0, 0, 0.2);
-      transition: all 0.2s;
-    }
-
-    .aero-button:hover {
-      background: linear-gradient(to bottom, #d8f6ff, #90d4ff);
-      transform: scale(1.02);
-    }
-
-    .glass-input {
-      background: rgba(255, 255, 255, 0.6);
-      border: 1px solid #90d4ff;
-      border-radius: 10px;
-      padding: 10px;
-      outline: none;
-      width: 100%;
-    }
-
-    .glass-input:focus {
-      box-shadow: 0 0 5px #90d4ff;
-      background: rgba(255, 255, 255, 0.8);
-    }
-
-    .step {
-      transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-    }
-  </style>
-</head>
-<body class="flex items-center justify-center min-h-screen px-4">
-  <div class="glass-panel p-8 max-w-md w-full">
-    <h1 class="text-3xl font-bold text-white text-center mb-6 drop-shadow">TikTok Downloader</h1>
-
-    <!-- Step Indicator -->
-    <div class="flex justify-between items-center mb-6 text-white text-sm font-semibold">
-      <div id="step1Indicator" class="text-blue-200">1. Masukkan URL</div>
-      <div id="step2Indicator" class="text-gray-400">2. Memproses</div>
-      <div id="step3Indicator" class="text-gray-400">3. Download</div>
-    </div>
-
-    <!-- STEP 1 -->
-    <div id="step1" class="step">
-      <label for="url" class="text-white text-sm font-semibold drop-shadow">TikTok Video URL</label>
-      <input
-        type="text"
-        id="url"
-        placeholder="https://www.tiktok.com/..."
-        class="glass-input mt-1"
-      />
-      <button
-        onclick="startFetch()"
-        class="aero-button w-full py-2 text-white font-semibold text-lg mt-4"
-      >
-        ➡️ Lanjutkan
-      </button>
-    </div>
-
-    <!-- STEP 2: Fetching -->
-    <div id="step2" class="step hidden text-center">
-      <p class="text-white mb-2">Mengambil data dari TikTok...</p>
-      <div class="animate-spin rounded-full h-10 w-10 border-t-4 border-white mx-auto mb-2"></div>
-      <p id="status" class="text-white text-sm">Mohon tunggu sebentar...</p>
-    </div>
-
-    <!-- STEP 3: Result & Download -->
-    <div id="step3" class="step hidden">
-      <p class="text-white text-sm mb-2">Pratinjau Video:</p>
-      <video id="videoPreview" controls class="w-full rounded-xl shadow-lg mb-4"></video>
-
-      <div class="flex gap-2">
-        <button onclick="downloadVideoNow()" class="aero-button w-1/2 py-2 text-white font-semibold text-lg">
-          🎬 MP4
-        </button>
-        <button onclick="downloadAudioNow()" class="aero-button w-1/2 py-2 text-white font-semibold text-lg">
-          🎵 MP3
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    let cachedResponse = null;
-
-    function updateStepper(current) {
-      const indicators = ["step1", "step2", "step3"];
-      indicators.forEach((id, index) => {
-        document.getElementById(id).classList.add("hidden");
-        document.getElementById(`${id}Indicator`).classList.remove("text-blue-200", "text-gray-400");
-        document.getElementById(`${id}Indicator`).classList.add(index === current ? "text-blue-200" : "text-gray-400");
-      });
-      document.getElementById(`step${current + 1}`).classList.remove("hidden");
-    }
-
-    function startFetch() {
-      const url = document.getElementById("url").value;
-      if (!url) return alert("URL tidak boleh kosong!");
-      updateStepper(1);
-
-      const options = {
-        method: 'GET',
-        url: 'https://tiktok-downloader-download-tiktok-videos-without-watermark.p.rapidapi.com/vid/index',
-        params: { url: url },
-        headers: {
-          'X-RapidAPI-Key': 'b9ab437e9amshd1177093a109ec5p19a1f3jsnbd62e18af13a',
-          'X-RapidAPI-Host': 'tiktok-downloader-download-tiktok-videos-without-watermark.p.rapidapi.com'
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Downloader YT & TikTok</title>
+    <style>
+        :root {
+            --primary: #FF0050;
+            --secondary: #25F4EE;
+            --dark: #121212;
+            --light: #F5F5F5;
+            --gray: #888;
         }
-      };
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #121212, #1E1E1E);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(30, 30, 30, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 28px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            background-clip: text;
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
 
-      axios.request(options).then(function (response) {
-        cachedResponse = response.data;
-        document.getElementById("videoPreview").src = response.data.video[0];
-        updateStepper(2);
-      }).catch(function (error) {
-        console.error(error);
-        alert("Gagal mengambil video. Periksa URL-nya.");
-        updateStepper(0);
-      });
-    }
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+        
+        .tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            padding: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            cursor: pointer;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--gray);
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        .input-group input:focus {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+        
+        .format-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .format-btn {
+            flex: 1;
+            padding: 15px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .format-btn.selected {
+            background: var(--primary);
+            box-shadow: 0 4px 15px rgba(255, 0, 80, 0.3);
+        }
+        
+        .format-btn i {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+        
+        .quality-select {
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            margin-bottom: 20px;
+            outline: none;
+        }
+        
+        .download-btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            border: none;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 0, 80, 0.4);
+        }
+        
+        .download-btn:disabled {
+            background: var(--gray);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .result.success {
+            border-left: 4px solid #00E676;
+        }
+        
+        .result.error {
+            border-left: 4px solid #FF3D00;
+        }
+        
+        .media-card {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .thumbnail {
+            width: 120px;
+            height: 90px;
+            border-radius: 8px;
+            object-fit: cover;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .media-info h3 {
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+        
+        .media-info p {
+            color: var(--gray);
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+        
+        .download-link {
+            display: inline-block;
+            padding: 12px 20px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .download-link:hover {
+            background: #FF0037;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 0, 80, 0.3);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .stats {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            font-size: 13px;
+            color: var(--gray);
+        }
+        
+        .stats span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .tips {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            font-size: 13px;
+            color: var(--gray);
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Downloader YT & TikTok</h1>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="youtube">
+                <i class="fab fa-youtube"></i> YouTube
+            </div>
+            <div class="tab" data-tab="tiktok">
+                <i class="fab fa-tiktok"></i> TikTok
+            </div>
+        </div>
+        
+        <div id="youtube-content">
+            <div class="input-group">
+                <label for="youtube-url">Tempel link YouTube disini:</label>
+                <input type="text" id="youtube-url" placeholder="https://youtube.com/watch?v=...">
+            </div>
+            
+            <div class="format-options">
+                <button class="format-btn selected" data-format="mp4">
+                    <i class="fas fa-film"></i>
+                    <span>Video (MP4)</span>
+                </button>
+                <button class="format-btn" data-format="mp3">
+                    <i class="fas fa-music"></i>
+                    <span>Audio (MP3)</span>
+                </button>
+            </div>
+            
+            <div id="quality-options">
+                <select class="quality-select" id="video-quality">
+                    <option value="480">480p (Standar)</option>
+                    <option value="720">720p (HD)</option>
+                    <option value="1080">1080p (Full HD)</option>
+                </select>
+                
+                <select class="quality-select hidden" id="audio-quality">
+                    <option value="128">128 kbps (Biasa)</option>
+                    <option value="192">192 kbps (Lumayan)</option>
+                    <option value="320">320 kbps (High Quality)</option>
+                </select>
+            </div>
+        </div>
+        
+        <div id="tiktok-content" class="hidden">
+            <div class="input-group">
+                <label for="tiktok-url">Tempel link TikTok disini:</label>
+                <input type="text" id="tiktok-url" placeholder="https://tiktok.com/@user/video/123...">
+            </div>
+            
+            <div class="format-options">
+                <button class="format-btn selected" data-format="mp4">
+                    <i class="fas fa-video"></i>
+                    <span>Video (MP4)</span>
+                </button>
+                <button class="format-btn" data-format="mp3">
+                    <i class="fas fa-headphones"></i>
+                    <span>Audio (MP3)</span>
+                </button>
+            </div>
+        </div>
+        
+        <button id="download-btn" class="download-btn">
+            <i class="fas fa-download"></i> DOWNLOAD SEKARANG
+        </button>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Sedang proses, sabar ya...</p>
+        </div>
+        
+        <div class="result" id="result"></div>
+    </div>
 
-    function downloadVideoNow() {
-      if (!cachedResponse) return;
-      const videoUrl = cachedResponse.video[0];
-
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', videoUrl, true);
-      xhr.responseType = 'blob';
-      xhr.onload = function () {
-        const blob = xhr.response;
-        const downloadUrl = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.download = 'tiktok_video.mp4';
-        a.click();
-        window.URL.revokeObjectURL(downloadUrl);
-      };
-      xhr.send();
-    }
-
-    function downloadAudioNow() {
-      if (!cachedResponse) return;
-      const audioUrl = cachedResponse.music;
-
-      if (!audioUrl) return alert("Audio tidak tersedia.");
-
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', audioUrl, true);
-      xhr.responseType = 'blob';
-      xhr.onload = function () {
-        const blob = xhr.response;
-        const downloadUrl = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.download = 'tiktok_audio.mp3';
-        a.click();
-        window.URL.revokeObjectURL(downloadUrl);
-      };
-      xhr.send();
-    }
-  </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const tabs = document.querySelectorAll('.tab');
+            const youtubeContent = document.getElementById('youtube-content');
+            const tiktokContent = document.getElementById('tiktok-content');
+            const youtubeUrl = document.getElementById('youtube-url');
+            const tiktokUrl = document.getElementById('tiktok-url');
+            const formatBtns = document.querySelectorAll('.format-btn');
+            const videoQuality = document.getElementById('video-quality');
+            const audioQuality = document.getElementById('audio-quality');
+            const downloadBtn = document.getElementById('download-btn');
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            
+            // State
+            let currentPlatform = 'youtube';
+            let currentFormat = 'mp4';
+            
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    currentPlatform = this.dataset.tab;
+                    
+                    youtubeContent.classList.toggle('hidden', currentPlatform !== 'youtube');
+                    tiktokContent.classList.toggle('hidden', currentPlatform !== 'tiktok');
+                    
+                    // Reset result when switching tabs
+                    result.style.display = 'none';
+                });
+            });
+            
+            // Format selection
+            formatBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    formatBtns.forEach(b => b.classList.remove('selected'));
+                    this.classList.add('selected');
+                    currentFormat = this.dataset.format;
+                    
+                    // Show appropriate quality options for YouTube
+                    if (currentPlatform === 'youtube') {
+                        videoQuality.classList.toggle('hidden', currentFormat !== 'mp4');
+                        audioQuality.classList.toggle('hidden', currentFormat !== 'mp3');
+                    }
+                });
+            });
+            
+            // Download button
+            downloadBtn.addEventListener('click', async function() {
+                const url = currentPlatform === 'youtube' 
+                    ? youtubeUrl.value.trim() 
+                    : tiktokUrl.value.trim();
+                
+                if (!url) {
+                    showResult('Woi, linknya mana? Masukin dulu dong!', 'error');
+                    return;
+                }
+                
+                // Validate URLs
+                if (currentPlatform === 'youtube' && !isValidYouTubeUrl(url)) {
+                    showResult('Link YouTube-nya kayanya salah tuh, cek lagi!', 'error');
+                    return;
+                }
+                
+                if (currentPlatform === 'tiktok' && !isValidTikTokUrl(url)) {
+                    showResult('Link TikTok-nya gak valid nih, coba yang bener dong!', 'error');
+                    return;
+                }
+                
+                // Start processing
+                downloadBtn.disabled = true;
+                downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> PROSES...';
+                loading.style.display = 'block';
+                result.style.display = 'none';
+                
+                try {
+                    const encodedUrl = encodeURIComponent(url);
+                    let apiUrl;
+                    
+                    if (currentPlatform === 'youtube') {
+                        if (currentFormat === 'mp4') {
+                            apiUrl = `https://api.ryzumi.vip/api/downloader/ytmp4?url=${encodedUrl}&quality=${videoQuality.value}`;
+                        } else {
+                            apiUrl = `https://api.ryzumi.vip/api/downloader/ytmp3?url=${encodedUrl}&bitrate=${audioQuality.value}`;
+                        }
+                    } else {
+                        apiUrl = `https://api.ryzumi.vip/api/downloader/ttdl?url=${encodedUrl}`;
+                        if (currentFormat === 'mp3') {
+                            apiUrl += '&audio=1';
+                        }
+                    }
+                    
+                    const response = await fetch(apiUrl, {
+                        method: 'GET',
+                        headers: {
+                            'accept': 'application/json'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Error ${response.status}: Gagal connect ke server`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log('API Response:', data);
+                    
+                    let downloadUrl, thumbnailUrl, title, statsHTML = '';
+                    
+                    if (currentPlatform === 'tiktok') {
+                        const tiktokData = data?.data?.data;
+                        if (!tiktokData) throw new Error('Strukturnya aneh nih, coba lagi ya!');
+                        
+                        if (currentFormat === 'mp4') {
+                            downloadUrl = tiktokData.hdplay || tiktokData.wmplay || tiktokData.play;
+                            if (!downloadUrl) throw new Error('Gak ketemu link videonya nih!');
+                        } else {
+                            downloadUrl = tiktokData.music_info?.play;
+                            if (!downloadUrl) throw new Error('Gak ketemu link audionya!');
+                        }
+                        
+                        thumbnailUrl = tiktokData.cover;
+                        title = tiktokData.title || 'Video TikTok';
+                        
+                        if (tiktokData.play_count || tiktokData.digg_count) {
+                            statsHTML = `<div class="stats">
+                                ${tiktokData.play_count ? `<span><i class="fas fa-eye"></i> ${formatNumber(tiktokData.play_count)}</span>` : ''}
+                                ${tiktokData.digg_count ? `<span><i class="fas fa-heart"></i> ${formatNumber(tiktokData.digg_count)}</span>` : ''}
+                                ${tiktokData.comment_count ? `<span><i class="fas fa-comment"></i> ${formatNumber(tiktokData.comment_count)}</span>` : ''}
+                            </div>`;
+                        }
+                    } else {
+                        // YouTube handling
+                        downloadUrl = findDownloadUrl(data);
+                        if (!downloadUrl) throw new Error('Link downloadnya ilang, coba lagi ya!');
+                        
+                        const videoId = extractVideoId(url);
+                        if (videoId) {
+                            thumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
+                        }
+                        title = 'Video YouTube';
+                    }
+                    
+                    showResult(downloadUrl, thumbnailUrl, title, statsHTML);
+                } catch (error) {
+                    console.error('Download error:', error);
+                    showResult(`ERROR: ${error.message}`, 'error');
+                } finally {
+                    loading.style.display = 'none';
+                    downloadBtn.disabled = false;
+                    downloadBtn.innerHTML = '<i class="fas fa-download"></i> DOWNLOAD SEKARANG';
+                }
+            });
+            
+            function showResult(downloadUrl, thumbnailUrl, title, statsHTML = '') {
+                const resultHTML = `
+                    <div class="media-card">
+                        ${thumbnailUrl ? `<img src="${thumbnailUrl}" class="thumbnail" alt="Thumbnail">` : ''}
+                        <div class="media-info">
+                            <h3>${title}</h3>
+                            <p>${currentFormat.toUpperCase()} - ${currentPlatform === 'youtube' ? 'YouTube' : 'TikTok'}</p>
+                            ${statsHTML}
+                            <a href="${downloadUrl}" class="download-link" download="${title}.${currentFormat}">
+                                <i class="fas fa-download"></i> Download Now
+                            </a>
+                        </div>
+                    </div>
+                    <div class="tips">
+                        <p><strong>Tips:</strong> Kalo download gak jalan, coba:</p>
+                        <ul>
+                            <li>Klik kanan tombol download → "Save link as..."</li>
+                            <li>Atau buka link di browser baru</li>
+                        </ul>
+                    </div>
+                `;
+                
+                result.innerHTML = resultHTML;
+                result.className = 'result success';
+                result.style.display = 'block';
+            }
+            
+            function findDownloadUrl(data) {
+                if (data?.url) return data.url;
+                if (data?.result?.url) return data.result.url;
+                if (data?.downloadUrl) return data.downloadUrl;
+                if (data?.link) return data.link;
+                if (data?.data?.url) return data.data.url;
+                if (data?.video?.url) return data.video.url;
+                if (data?.audio?.url) return data.audio.url;
+                return null;
+            }
+            
+            function isValidYouTubeUrl(url) {
+                return /youtu\.?be/.test(url);
+            }
+            
+            function isValidTikTokUrl(url) {
+                return /tiktok\.com/.test(url);
+            }
+            
+            function extractVideoId(url) {
+                const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+                return match ? match[1] : null;
+            }
+            
+            function formatNumber(num) {
+                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            }
+        });
+    </script>
 </body>
 </html>
