@@ -44,9 +44,7 @@
             font-size: 28px;
             background: linear-gradient(45deg, var(--primary), var(--secondary));
             background-clip: text;
--webkit-background-clip: text;
--webkit-text-fill-color: transparent;
-
+            -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             font-weight: 800;
         }
@@ -280,87 +278,204 @@
         .hidden {
             display: none;
         }
+        
+        #popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #popup-content {
+            background-color: #f9f9f9;
+            color: #111;
+            width: 90%;
+            max-width: 500px;
+            margin: 10% auto;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.4s ease;
+        }
+        
+        .popup-header {
+            background-color: #ddd;
+            color: #111;
+            padding: 14px 20px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 16px;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: #111;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .popup-body {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .popup-body .popup-text {
+            font-size: 15px;
+            margin-bottom: 16px;
+            line-height: 1.5;
+            color: #111;
+        }
+        
+        .popup-gif {
+            border-radius: 8px;
+            max-width: 70%; /* Reduced GIF size */
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .confirm-btn {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .confirm-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(255, 0, 80, 0.3);
+        }
+        
+        .main-content {
+            transition: filter 0.3s ease;
+        }
+        
+        .main-content.blurred {
+            filter: blur(5px);
+            pointer-events: none; /* Prevent interaction with background */
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Downloader YT & TikTok</h1>
-        
-        <div class="tabs">
-            <div class="tab active" data-tab="youtube">
-                <i class="fab fa-youtube"></i> YouTube
+    <!-- Popup -->
+    <div id="popup">
+        <div id="popup-content">
+            <div class="popup-header">
+                SELAMAT DATANG
+                <button class="close-btn" onclick="closePopup()">×</button>
             </div>
-            <div class="tab" data-tab="tiktok">
-                <i class="fab fa-tiktok"></i> TikTok
-            </div>
-        </div>
-        
-        <div id="youtube-content">
-            <div class="input-group">
-                <label for="youtube-url">Tempel link YouTube disini:</label>
-                <input type="text" id="youtube-url" placeholder="https://youtube.com/watch?v=...">
-            </div>
-            
-            <div class="format-options">
-                <button class="format-btn selected" data-format="mp4">
-                    <i class="fas fa-film"></i>
-                    <span>Video (MP4)</span>
-                </button>
-                <button class="format-btn" data-format="mp3">
-                    <i class="fas fa-music"></i>
-                    <span>Audio (MP3)</span>
-                </button>
-            </div>
-            
-            <div id="quality-options">
-                <select class="quality-select" id="video-quality">
-                    <option value="480">480p (Standar)</option>
-                    <option value="720">720p (HD)</option>
-                    <option value="1080">1080p (Full HD)</option>
-                </select>
-                
-                <select class="quality-select hidden" id="audio-quality">
-                    <option value="128">128 kbps (Biasa)</option>
-                    <option value="192">192 kbps (Lumayan)</option>
-                    <option value="320">320 kbps (High Quality)</option>
-                </select>
-            </div>
-        </div>
-        
-        <div id="tiktok-content" class="hidden">
-            <div class="input-group">
-                <label for="tiktok-url">Tempel link TikTok disini:</label>
-                <input type="text" id="tiktok-url" placeholder="https://tiktok.com/@user/video/123...">
-            </div>
-            
-            <div class="format-options">
-                <button class="format-btn selected" data-format="mp4">
-                    <i class="fas fa-video"></i>
-                    <span>Video (MP4)</span>
-                </button>
-                <button class="format-btn" data-format="mp3">
-                    <i class="fas fa-headphones"></i>
-                    <span>Audio (MP3)</span>
+            <div class="popup-body">
+                <div class="popup-text">
+                    <p>Selamat datang di website <strong>daniel77</strong>! Semoga harimu menyenangkan 🎉</p>
+                </div>
+                <div class="tenor-gif-embed" data-postid="6415788372471391141" data-share-method="host" data-aspect-ratio="0.801205" data-width="100%">
+                    <a href="https://tenor.com/view/druski-druski-dance-kai-cenat-gif-6415788372471391141">Druski Druski Dance GIF</a> from 
+                    <a href="https://tenor.com/search/druski-gifs">Druski GIFs</a>
+                </div>
+                <script type="text/javascript" async src="https://tenor.com/embed.js"></script>
+                <button class="confirm-btn" onclick="closePopup()">
+                    👍 Lanjutkan ke Website
                 </button>
             </div>
         </div>
-        
-        <button id="download-btn" class="download-btn">
-            <i class="fas fa-download"></i> DOWNLOAD SEKARANG
-        </button>
-        
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Sedang proses, sabar ya...</p>
+    </div>
+
+    <div class="main-content">
+        <div class="container">
+            <h1>Downloader YT & TikTok</h1>
+            <div class="tabs">
+                <div class="tab active" data-tab="youtube">
+                    <i class="fab fa-youtube"></i> YouTube
+                </div>
+                <div class="tab" data-tab="tiktok">
+                    <i class="fab fa-tiktok"></i> TikTok
+                </div>
+            </div>
+            <div id="youtube-content">
+                <div class="input-group">
+                    <label for="youtube-url">Tempel link YouTube disini:</label>
+                    <input type="text" id="youtube-url" placeholder="https://youtube.com/watch?v=...">
+                </div>
+                <div class="format-options">
+                    <button class="format-btn selected" data-format="mp4">
+                        <i class="fas fa-film"></i>
+                        <span>Video (MP4)</span>
+                    </button>
+                    <button class="format-btn" data-format="mp3">
+                        <i class="fas fa-music"></i>
+                        <span>Audio (MP3)</span>
+                    </button>
+                </div>
+                <div id="quality-options">
+                    <select class="quality-select" id="video-quality">
+                        <option value="480">480p (Standar)</option>
+                        <option value="720">720p (HD)</option>
+                        <option value="1080">1080p (Full HD)</option>
+                    </select>
+                    <select class="quality-select hidden" id="audio-quality">
+                        <option value="128">128 kbps (Biasa)</option>
+                        <option value="192">192 kbps (Lumayan)</option>
+                        <option value="320">320 kbps (High Quality)</option>
+                    </select>
+                </div>
+            </div>
+            <div id="tiktok-content" class="hidden">
+                <div class="input-group">
+                    <label for="tiktok-url">Tempel link TikTok disini:</label>
+                    <input type="text" id="tiktok-url" placeholder="https://tiktok.com/@user/video/123...">
+                </div>
+                <div class="format-options">
+                    <button class="format-btn selected" data-format="mp4">
+                        <i class="fas fa-video"></i>
+                        <span>Video (MP4)</span>
+                    </button>
+                    <button class="format-btn" data-format="mp3">
+                        <i class="fas fa-headphones"></i>
+                        <span>Audio (MP3)</span>
+                    </button>
+                </div>
+            </div>
+            <button id="download-btn" class="download-btn">
+                <i class="fas fa-download"></i> DOWNLOAD SEKARANG
+            </button>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Sedang proses, sabar ya...</p>
+            </div>
+            <div class="result" id="result"></div>
         </div>
-        
-        <div class="result" id="result"></div>
     </div>
 
     <script>
+        window.onload = function () {
+            document.getElementById("popup").style.display = "flex";
+            document.querySelector(".main-content").classList.add("blurred");
+        };
+
+        function closePopup() {
+            document.getElementById("popup").style.display = "none";
+            document.querySelector(".main-content").classList.remove("blurred");
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
-            // Elements
             const tabs = document.querySelectorAll('.tab');
             const youtubeContent = document.getElementById('youtube-content');
             const tiktokContent = document.getElementById('tiktok-content');
@@ -373,33 +488,25 @@
             const loading = document.getElementById('loading');
             const result = document.getElementById('result');
             
-            // State
             let currentPlatform = 'youtube';
             let currentFormat = 'mp4';
             
-            // Tab switching
             tabs.forEach(tab => {
                 tab.addEventListener('click', function() {
                     tabs.forEach(t => t.classList.remove('active'));
                     this.classList.add('active');
                     currentPlatform = this.dataset.tab;
-                    
                     youtubeContent.classList.toggle('hidden', currentPlatform !== 'youtube');
                     tiktokContent.classList.toggle('hidden', currentPlatform !== 'tiktok');
-                    
-                    // Reset result when switching tabs
                     result.style.display = 'none';
                 });
             });
             
-            // Format selection
             formatBtns.forEach(btn => {
                 btn.addEventListener('click', function() {
                     formatBtns.forEach(b => b.classList.remove('selected'));
                     this.classList.add('selected');
                     currentFormat = this.dataset.format;
-                    
-                    // Show appropriate quality options for YouTube
                     if (currentPlatform === 'youtube') {
                         videoQuality.classList.toggle('hidden', currentFormat !== 'mp4');
                         audioQuality.classList.toggle('hidden', currentFormat !== 'mp3');
@@ -407,7 +514,6 @@
                 });
             });
             
-            // Download button
             downloadBtn.addEventListener('click', async function() {
                 const url = currentPlatform === 'youtube' 
                     ? youtubeUrl.value.trim() 
@@ -418,7 +524,6 @@
                     return;
                 }
                 
-                // Validate URLs
                 if (currentPlatform === 'youtube' && !isValidYouTubeUrl(url)) {
                     showResult('Link YouTube-nya kayanya salah tuh, cek lagi!', 'error');
                     return;
@@ -429,7 +534,6 @@
                     return;
                 }
                 
-                // Start processing
                 downloadBtn.disabled = true;
                 downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> PROSES...';
                 loading.style.display = 'block';
@@ -491,7 +595,6 @@
                             </div>`;
                         }
                     } else {
-                        // YouTube handling
                         downloadUrl = findDownloadUrl(data);
                         if (!downloadUrl) throw new Error('Link downloadnya ilang, coba lagi ya!');
                         
