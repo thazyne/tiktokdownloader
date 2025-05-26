@@ -6,279 +6,469 @@
     <title>ts pmo platform downloader</title>
     <style>
         :root {
-            --primary: #FF0050;
-            --secondary: #25F4EE;
-            --dark: #121212;
-            --light: #F5F5F5;
-            --gray: #888;
+            --primary: #6366F1;
+            --primary-dark: #4F46E5;
+            --secondary: #10B981;
+            --dark: #111827;
+            --light: #F9FAFB;
+            --gray: #6B7280;
+            --surface: #1F2937;
+            --surface-light: #374151;
         }
         
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
         }
         
         body {
-            background: linear-gradient(135deg, #121212, #1E1E1E);
-            color: white;
+            background: var(--dark);
+            color: var(--light);
             min-height: 100vh;
-            padding: 20px;
+            line-height: 1.6;
         }
-        
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: rgba(30, 30, 30, 0.8);
+
+        .app {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: var(--surface);
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
             backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 25px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 28px;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-weight: 800;
         }
-        
+
+        .main {
+            flex: 1;
+            padding: 2rem 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .section-header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section-subtitle {
+            color: var(--gray);
+            font-size: 1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
         .tabs {
             display: flex;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50px;
-            padding: 5px;
-            margin-bottom: 20px;
+            background: var(--surface);
+            border-radius: 1rem;
+            padding: 0.5rem;
+            margin-bottom: 2rem;
+            gap: 0.75rem;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
         
         .tab {
             flex: 1;
             text-align: center;
-            padding: 12px;
+            padding: 1rem 1.5rem;
             cursor: pointer;
-            border-radius: 50px;
+            border-radius: 0.75rem;
             font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--gray);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.625rem;
+            font-size: 0.9375rem;
+            z-index: 1;
+        }
+        
+        .tab i {
+            font-size: 1.125rem;
             transition: all 0.3s ease;
         }
         
+        .tab:hover {
+            color: var(--light);
+        }
+        
+        .tab:hover i {
+            transform: scale(1.1);
+        }
+        
         .tab.active {
+            color: var(--light);
+            background: transparent;
+            box-shadow: none;
+        }
+        
+        .tab.active i {
+            color: var(--primary);
+        }
+        
+        .tab.active::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(79, 70, 229, 0.1));
+            border-radius: 0.75rem;
+            z-index: -1;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1.875rem;
+            height: 0.1875rem;
             background: var(--primary);
-            color: white;
+            border-radius: 0.1875rem;
+            transition: all 0.3s ease;
         }
-        
-        .input-group {
-            margin-bottom: 20px;
+
+        .content-wrapper {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 1rem;
         }
-        
-        .input-group label {
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 0.5rem;
             font-weight: 500;
-            color: var(--gray);
+            color: var(--light);
+            font-size: 0.875rem;
         }
-        
-        .input-group input {
+
+        .form-input {
             width: 100%;
-            padding: 15px;
-            border-radius: 12px;
-            border: none;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            font-size: 16px;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border: 2px solid var(--surface-light);
+            background: var(--surface-light);
+            color: var(--light);
+            font-size: 1rem;
             outline: none;
             transition: all 0.3s;
         }
-        
-        .input-group input:focus {
-            background: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 0 0 2px var(--primary);
+
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
         }
-        
-        .format-options {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+
+        .format-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
         }
-        
-        .format-btn {
-            flex: 1;
-            padding: 15px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: white;
+
+        .format-option {
+            padding: 1.25rem;
+            border-radius: 1rem;
+            background: var(--surface-light);
+            border: 2px solid transparent;
+            color: var(--light);
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
             display: flex;
             flex-direction: column;
             align-items: center;
+            gap: 0.75rem;
         }
-        
-        .format-btn.selected {
+
+        .format-option:hover {
+            transform: translateY(-2px);
+            background: var(--surface);
+            border-color: var(--primary);
+        }
+
+        .format-option.selected {
             background: var(--primary);
-            box-shadow: 0 4px 15px rgba(255, 0, 80, 0.3);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
         }
-        
-        .format-btn i {
-            font-size: 20px;
-            margin-bottom: 5px;
+
+        .format-option i {
+            font-size: 1.5rem;
         }
-        
+
         .quality-select {
             width: 100%;
-            padding: 15px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: white;
-            margin-bottom: 20px;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            background: var(--surface-light);
+            border: 2px solid var(--surface-light);
+            color: var(--light);
+            margin-bottom: 1.5rem;
             outline: none;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
         }
-        
-        .download-btn {
+
+        .quality-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+        }
+
+        .btn {
             width: 100%;
-            padding: 16px;
-            border-radius: 12px;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            padding: 1rem;
+            border-radius: 0.75rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             border: none;
             color: white;
             font-weight: 700;
-            font-size: 16px;
+            font-size: 1rem;
             cursor: pointer;
             transition: all 0.3s;
-            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            max-width: 600px;
+            margin: 0 auto;
         }
-        
-        .download-btn:hover {
+
+        .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(255, 0, 80, 0.4);
+            box-shadow: 0 12px 24px rgba(99, 102, 241, 0.4);
         }
-        
-        .download-btn:disabled {
+
+        .btn:disabled {
             background: var(--gray);
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
         }
-        
+
         .result {
-            margin-top: 25px;
-            padding: 20px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.1);
+            margin-top: 2rem;
+            padding: 0;
+            border-radius: 1.25rem;
+            background: transparent;
             display: none;
             animation: fadeIn 0.5s ease;
+            max-width: 480px;
+            margin-left: auto;
+            margin-right: auto;
+            border: none;
+            box-shadow: none;
         }
-        
+
         .result.success {
-            border-left: 4px solid #00E676;
+            border-left: 4px solid var(--secondary);
         }
-        
+
         .result.error {
-            border-left: 4px solid #FF3D00;
+            border-left: 4px solid #EF4444;
         }
-        
+
         .media-card {
             display: flex;
-            gap: 15px;
-            align-items: center;
+            flex-direction: row;
+            align-items: flex-start;
+            background: var(--surface-light);
+            padding: 1.5rem 1.5rem 1.25rem 1.5rem;
+            border-radius: 1.25rem 1.25rem 0 0;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 8px 32px -8px rgba(0,0,0,0.18);
+            gap: 1.25rem;
         }
-        
+
         .thumbnail {
-            width: 120px;
-            height: 90px;
-            border-radius: 8px;
+            width: 140px;
+            height: 105px;
+            border-radius: 0.75rem;
             object-fit: cover;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.13);
+            flex-shrink: 0;
         }
-        
+
+        .media-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            min-width: 0;
+        }
+
         .media-info h3 {
-            margin-bottom: 8px;
-            font-size: 18px;
+            margin: 0 0 0.25rem 0;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--light);
+            line-height: 1.3;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-        
+
         .media-info p {
             color: var(--gray);
-            margin-bottom: 12px;
-            font-size: 14px;
+            margin: 0;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
-        
-        .download-link {
-            display: inline-block;
-            padding: 12px 20px;
-            background: var(--primary);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .download-link:hover {
-            background: #FF0037;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 0, 80, 0.3);
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 20px;
-            display: none;
-        }
-        
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            margin: 0 auto 15px;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
+
         .stats {
             display: flex;
-            gap: 15px;
-            margin-top: 10px;
-            font-size: 13px;
+            gap: 1rem;
+            margin: 0.25rem 0 0.5rem 0;
+            font-size: 0.92rem;
             color: var(--gray);
+            flex-wrap: wrap;
         }
-        
+
         .stats span {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 0.3rem;
+            background: rgba(255,255,255,0.04);
+            padding: 0.25rem 0.7rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
         }
-        
+
+        .download-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.7rem 1.25rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            text-decoration: none;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s;
+            margin-top: 0.5rem;
+            width: fit-content;
+            box-shadow: 0 2px 8px rgba(99,102,241,0.13);
+        }
+
+        .download-link:hover {
+            transform: translateY(-2px) scale(1.04);
+            box-shadow: 0 8px 16px rgba(99,102,241,0.18);
+        }
+
+        .download-link i {
+            font-size: 1.1rem;
+        }
+
         .tips {
-            margin-top: 15px;
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            font-size: 13px;
+            margin-top: 0;
+            padding: 1.1rem 1.5rem 1.1rem 1.5rem;
+            background: var(--surface);
+            border-radius: 0 0 1.25rem 1.25rem;
+            font-size: 0.97rem;
+            color: var(--gray);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-top: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .tips p {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.7rem;
+            color: var(--light);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .tips ul {
+            margin: 0;
+            padding-left: 1.2rem;
+            list-style-type: disc;
+        }
+
+        .tips li {
+            margin-bottom: 0.3rem;
+            font-size: 0.97rem;
             color: var(--gray);
         }
-        
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            display: none;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            animation: spin 1s linear infinite;
+        }
+
         .hidden {
             display: none;
         }
-        
+
         #popup {
             display: none;
             position: fixed;
@@ -286,192 +476,629 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(5px);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
             z-index: 1000;
             justify-content: center;
             align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
-        
+
+        #popup.active {
+            opacity: 1;
+        }
+
         #popup-content {
-            background-color: #f9f9f9;
-            color: #111;
+            background: var(--surface);
+            color: var(--light);
             width: 90%;
-            max-width: 500px;
-            margin: 10% auto;
-            border-radius: 12px;
+            max-width: 400px;
+            border-radius: 1.25rem;
             overflow: hidden;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            animation: fadeIn 0.4s ease;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transform: translateY(0);
         }
-        
+
         .popup-header {
-            background-color: #ddd;
-            color: #111;
-            padding: 14px 20px;
-            font-weight: bold;
+            background: var(--surface-light);
+            color: var(--light);
+            padding: 1.25rem;
+            font-weight: 700;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 16px;
+            font-size: 1.125rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
+
         .close-btn {
             background: none;
             border: none;
-            color: #111;
-            font-size: 20px;
+            color: var(--light);
+            font-size: 1.5rem;
             cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(90deg);
+        }
+
         .popup-body {
-            padding: 20px;
+            padding: 1.5rem;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
         }
-        
-        .popup-body .popup-text {
-            font-size: 15px;
-            margin-bottom: 16px;
+
+        .popup-text {
+            font-size: 1rem;
+            margin-bottom: 1.25rem;
             line-height: 1.5;
-            color: #111;
+            color: var(--light);
         }
-        
+
+        .popup-text strong {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .popup-emoji {
+            font-size: 1.75rem;
+            margin-bottom: 0.75rem;
+            animation: bounce 1s infinite;
+        }
+
+        .popup-gif-container {
+            width: 100%;
+            max-width: 250px;
+            margin: 1.25rem auto;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
         .popup-gif {
-            border-radius: 8px;
-            max-width: 70%; /* Reduced GIF size */
-            margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 1rem;
         }
-        
+
         .confirm-btn {
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
             border: none;
-            padding: 12px 24px;
-            font-size: 15px;
+            padding: 0.875rem 1.75rem;
+            font-size: 0.9375rem;
             font-weight: 600;
-            border-radius: 8px;
+            border-radius: 0.75rem;
             cursor: pointer;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
         }
-        
+
         .confirm-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(255, 0, 80, 0.3);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
         }
-        
+
+        .confirm-btn i {
+            font-size: 1.25rem;
+        }
+
         .main-content {
             transition: filter 0.3s ease;
         }
-        
+
         .main-content.blurred {
-            filter: blur(5px);
-            pointer-events: none; /* Prevent interaction with background */
+            filter: blur(8px);
+            pointer-events: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main {
+                padding: 1rem;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+            }
+
+            .section-subtitle {
+                font-size: 0.875rem;
+            }
+
+            .format-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .content-wrapper {
+                padding: 0;
+            }
+        }
+
+        @media (max-width: 640px) {
+            #popup-content {
+                width: 90%;
+                margin: 1rem;
+                max-width: 320px;
+            }
+
+            .popup-header {
+                padding: 1rem;
+                font-size: 1rem;
+            }
+
+            .popup-body {
+                padding: 1.25rem;
+            }
+
+            .popup-text {
+                font-size: 0.9375rem;
+            }
+
+            .popup-gif-container {
+                max-width: 200px;
+            }
+
+            .confirm-btn {
+                padding: 0.75rem 1.5rem;
+                font-size: 0.875rem;
+            }
+
+            .media-card {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .thumbnail {
+                width: 100%;
+                height: 200px;
+                margin: 0 auto;
+            }
+
+            .stats {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .download-link {
+                margin: 0.5rem auto 0;
+            }
+
+            .tips {
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .main {
+                padding: 1rem 0.5rem;
+            }
+            .footer {
+                padding: 1.25rem 0.5rem;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .result, .media-card, .tips {
+                max-width: 100%;
+                border-radius: 1rem;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+            }
+            .media-card {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+                padding: 1rem 0.5rem 1rem 0.5rem;
+            }
+            .thumbnail {
+                width: 100%;
+                height: 180px;
+                margin: 0 auto;
+            }
+            .media-info {
+                width: 100%;
+                align-items: center;
+                text-align: center;
+            }
+            .media-info h3 {
+                white-space: normal;
+                font-size: 1.05rem;
+            }
+            .stats {
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+                margin-bottom: 0.5rem;
+            }
+            .download-link {
+                margin: 0.5rem auto 0;
+                width: 100%;
+                justify-content: center;
+                font-size: 0.97rem;
+                padding: 0.8rem 0;
+            }
+            .tips {
+                border-radius: 0 0 1rem 1rem;
+                padding: 0.8rem 0.5rem;
+                font-size: 0.93rem;
+            }
+            .tips p {
+                font-size: 0.97rem;
+            }
+            .tips ul {
+                padding-left: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main {
+                padding: 0.5rem 0.2rem;
+            }
+            .section-header, .section-title, .section-subtitle {
+                padding-left: 0.2rem;
+                padding-right: 0.2rem;
+            }
+            .tabs {
+                padding: 0.2rem;
+                gap: 0.2rem;
+                font-size: 0.95rem;
+            }
+            .form-input, .quality-select {
+                font-size: 0.97rem;
+                padding: 0.7rem;
+            }
+            .format-option {
+                padding: 0.7rem;
+                font-size: 0.97rem;
+            }
+            .footer {
+                padding: 0.7rem 0.2rem;
+            }
+            .footer-content {
+                gap: 0.7rem;
+            }
+            .footer-title {
+                font-size: 1rem;
+            }
+            .footer-section p, .footer-link {
+                font-size: 0.93rem;
+            }
+            .footer-bottom {
+                font-size: 0.8rem;
+                padding-top: 0.7rem;
+            }
+        }
+
+        .footer {
+            background: var(--surface);
+            padding: 2rem 1.5rem;
+            margin-top: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .footer-title {
+            color: var(--light);
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .footer-link {
+            color: var(--gray);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-link:hover {
+            color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .footer-link i {
+            font-size: 1rem;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .social-link {
+            color: var(--gray);
+            font-size: 1.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .social-link:hover {
+            color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 2rem auto 0;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            color: var(--gray);
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 768px) {
+            .footer {
+                padding: 1.5rem 1rem;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .footer-section {
+                text-align: center;
+            }
+
+            .footer-links {
+                align-items: center;
+            }
+
+            .footer-social {
+                justify-content: center;
+            }
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div class="app">
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">Salty Downloader</div>
+            </div>
+        </header>
+
+        <main class="main">
+            <section class="section">
+                <div class="section-header">
+                    <h1 class="section-title">Download Video & Audio</h1>
+                    <p class="section-subtitle">Download video dan audio dari YouTube dan TikTok dengan mudah</p>
+                </div>
+
+                <div class="content-wrapper">
+                    <div class="tabs">
+                        <div class="tab active" data-tab="youtube">
+                            <i class="fab fa-youtube"></i> YouTube
+                        </div>
+                        <div class="tab" data-tab="tiktok">
+                            <i class="fab fa-tiktok"></i> TikTok
+                        </div>
+                    </div>
+
+                    <div id="youtube-content">
+                        <div class="form-group">
+                            <label class="form-label" for="youtube-url">Tempel link YouTube disini:</label>
+                            <input type="text" id="youtube-url" class="form-input" placeholder="https://youtube.com/watch?v=...">
+                        </div>
+
+                        <div class="format-grid">
+                            <button class="format-option selected" data-format="mp4">
+                                <i class="fas fa-film"></i>
+                                <span>Video (MP4)</span>
+                            </button>
+                            <button class="format-option" data-format="mp3">
+                                <i class="fas fa-music"></i>
+                                <span>Audio (MP3)</span>
+                            </button>
+                        </div>
+
+                        <div id="quality-options">
+                            <select class="quality-select" id="video-quality">
+                                <option value="480">480p (Standar)</option>
+                                <option value="720">720p (HD)</option>
+                                <option value="1080">1080p (Full HD)</option>
+                            </select>
+                            <select class="quality-select hidden" id="audio-quality">
+                                <option value="128">128 kbps (Biasa)</option>
+                                <option value="192">192 kbps (Lumayan)</option>
+                                <option value="320">320 kbps (High Quality)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="tiktok-content" class="hidden">
+                        <div class="form-group">
+                            <label class="form-label" for="tiktok-url">Tempel link TikTok disini:</label>
+                            <input type="text" id="tiktok-url" class="form-input" placeholder="https://tiktok.com/@user/video/123...">
+                        </div>
+
+                        <div class="format-grid">
+                            <button class="format-option selected" data-format="mp4">
+                                <i class="fas fa-video"></i>
+                                <span>Video (MP4)</span>
+                            </button>
+                            <button class="format-option" data-format="mp3">
+                                <i class="fas fa-headphones"></i>
+                                <span>Audio (MP3)</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button id="download-btn" class="btn">
+                        <i class="fas fa-download"></i> DOWNLOAD SEKARANG
+                    </button>
+
+                    <div class="loading" id="loading">
+                        <div class="spinner"></div>
+                        <p>Sedang proses, sabar ya...</p>
+                    </div>
+
+                    <div class="result" id="result"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3 class="footer-title">Salty Downloader</h3>
+                <p style="color: var(--gray); font-size: 0.9375rem; line-height: 1.5;">
+                    Platform download video dan audio terbaik untuk YouTube dan TikTok. Download dengan mudah dan cepat.
+                </p>
+                <div class="footer-social">
+                    <a href="https://www.instagram.com/saaalty7?igsh=MXd4ajJ2cGkwbTBpcQ==" class="social-link"><i class="fab fa-instagram"></i></a>
+                    <a href="https://github.com/thazyne" class="social-link"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h3 class="footer-title">Fitur</h3>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">
+                        <i class="fas fa-video"></i>
+                        Download Video YouTube
+                    </a>
+                    <a href="#" class="footer-link">
+                        <i class="fas fa-music"></i>
+                        Download Audio MP3
+                    </a>
+                    <a href="#" class="footer-link">
+                        <i class="fab fa-tiktok"></i>
+                        Download Video TikTok
+                    </a>
+                    <a href="#" class="footer-link">
+                        <i class="fas fa-bolt"></i>
+                        Download Cepat
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2025 Salty Downloader. All rights reserved.</p>
+        </div>
+    </footer>
+
     <!-- Popup -->
     <div id="popup">
         <div id="popup-content">
             <div class="popup-header">
-                SELAMAT DATANG
-                <button class="close-btn" onclick="closePopup()">×</button>
+                <span>Selamat Datang di Salty Downloader</span>
+                <button class="close-btn" onclick="closePopup()">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <div class="popup-body">
+                <div class="popup-emoji">👋</div>
                 <div class="popup-text">
-                    <p>Selamat datang di website <strong>daniel77</strong>! Semoga harimu menyenangkan 🎉</p>
+                    <p>Selamat datang di website <strong>Salty Downloader</strong>!</p>
+                    <p>Platform download video dan audio terbaik untuk YouTube dan TikTok.</p>
                 </div>
-                <div class="tenor-gif-embed" data-postid="6415788372471391141" data-share-method="host" data-aspect-ratio="0.801205" data-width="100%">
-                    <a href="https://tenor.com/view/druski-druski-dance-kai-cenat-gif-6415788372471391141">Druski Druski Dance GIF</a> from 
-                    <a href="https://tenor.com/search/druski-gifs">Druski GIFs</a>
+                <div class="popup-gif-container">
+                    <div class="tenor-gif-embed" data-postid="6415788372471391141" data-share-method="host" data-aspect-ratio="0.801205" data-width="100%">
+                        <a href="https://tenor.com/view/druski-druski-dance-kai-cenat-gif-6415788372471391141">Druski Druski Dance GIF</a> from 
+                        <a href="https://tenor.com/search/druski-gifs">Druski GIFs</a>
+                    </div>
+                    <script type="text/javascript" async src="https://tenor.com/embed.js"></script>
                 </div>
-                <script type="text/javascript" async src="https://tenor.com/embed.js"></script>
                 <button class="confirm-btn" onclick="closePopup()">
-                    👍 Lanjutkan ke Website
+                    <i class="fas fa-rocket"></i>
+                    Mulai Download Sekarang
                 </button>
             </div>
         </div>
     </div>
 
-    <div class="main-content">
-        <div class="container">
-            <h1>Downloader YT & TikTok</h1>
-            <div class="tabs">
-                <div class="tab active" data-tab="youtube">
-                    <i class="fab fa-youtube"></i> YouTube
-                </div>
-                <div class="tab" data-tab="tiktok">
-                    <i class="fab fa-tiktok"></i> TikTok
-                </div>
-            </div>
-            <div id="youtube-content">
-                <div class="input-group">
-                    <label for="youtube-url">Tempel link YouTube disini:</label>
-                    <input type="text" id="youtube-url" placeholder="https://youtube.com/watch?v=...">
-                </div>
-                <div class="format-options">
-                    <button class="format-btn selected" data-format="mp4">
-                        <i class="fas fa-film"></i>
-                        <span>Video (MP4)</span>
-                    </button>
-                    <button class="format-btn" data-format="mp3">
-                        <i class="fas fa-music"></i>
-                        <span>Audio (MP3)</span>
-                    </button>
-                </div>
-                <div id="quality-options">
-                    <select class="quality-select" id="video-quality">
-                        <option value="480">480p (Standar)</option>
-                        <option value="720">720p (HD)</option>
-                        <option value="1080">1080p (Full HD)</option>
-                    </select>
-                    <select class="quality-select hidden" id="audio-quality">
-                        <option value="128">128 kbps (Biasa)</option>
-                        <option value="192">192 kbps (Lumayan)</option>
-                        <option value="320">320 kbps (High Quality)</option>
-                    </select>
-                </div>
-            </div>
-            <div id="tiktok-content" class="hidden">
-                <div class="input-group">
-                    <label for="tiktok-url">Tempel link TikTok disini:</label>
-                    <input type="text" id="tiktok-url" placeholder="https://tiktok.com/@user/video/123...">
-                </div>
-                <div class="format-options">
-                    <button class="format-btn selected" data-format="mp4">
-                        <i class="fas fa-video"></i>
-                        <span>Video (MP4)</span>
-                    </button>
-                    <button class="format-btn" data-format="mp3">
-                        <i class="fas fa-headphones"></i>
-                        <span>Audio (MP3)</span>
-                    </button>
-                </div>
-            </div>
-            <button id="download-btn" class="download-btn">
-                <i class="fas fa-download"></i> DOWNLOAD SEKARANG
-            </button>
-            <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <p>Sedang proses, sabar ya...</p>
-            </div>
-            <div class="result" id="result"></div>
-        </div>
-    </div>
-
     <script>
         window.onload = function () {
-            document.getElementById("popup").style.display = "flex";
+            const popup = document.getElementById("popup");
+            popup.style.display = "flex";
+            setTimeout(() => {
+                popup.classList.add("active");
+            }, 100);
             document.querySelector(".main-content").classList.add("blurred");
         };
 
         function closePopup() {
-            document.getElementById("popup").style.display = "none";
+            const popup = document.getElementById("popup");
+            popup.classList.remove("active");
+            setTimeout(() => {
+                popup.style.display = "none";
+            }, 300);
             document.querySelector(".main-content").classList.remove("blurred");
         }
 
@@ -481,7 +1108,7 @@
             const tiktokContent = document.getElementById('tiktok-content');
             const youtubeUrl = document.getElementById('youtube-url');
             const tiktokUrl = document.getElementById('tiktok-url');
-            const formatBtns = document.querySelectorAll('.format-btn');
+            const formatBtns = document.querySelectorAll('.format-option');
             const videoQuality = document.getElementById('video-quality');
             const audioQuality = document.getElementById('audio-quality');
             const downloadBtn = document.getElementById('download-btn');
@@ -622,7 +1249,10 @@
                         ${thumbnailUrl ? `<img src="${thumbnailUrl}" class="thumbnail" alt="Thumbnail">` : ''}
                         <div class="media-info">
                             <h3>${title}</h3>
-                            <p>${currentFormat.toUpperCase()} - ${currentPlatform === 'youtube' ? 'YouTube' : 'TikTok'}</p>
+                            <p>
+                                <i class="fas ${currentFormat === 'mp4' ? 'fa-video' : 'fa-music'}"></i>
+                                ${currentFormat.toUpperCase()} - ${currentPlatform === 'youtube' ? 'YouTube' : 'TikTok'}
+                            </p>
                             ${statsHTML}
                             <a href="${downloadUrl}" class="download-link" download="${title}.${currentFormat}">
                                 <i class="fas fa-download"></i> Download Now
@@ -630,10 +1260,11 @@
                         </div>
                     </div>
                     <div class="tips">
-                        <p><strong>Tips:</strong> Kalo download gak jalan, coba:</p>
+                        <p><i class="fas fa-lightbulb"></i> Tips Download</p>
                         <ul>
-                            <li>Klik kanan tombol download → "Save link as..."</li>
-                            <li>Atau buka link di browser baru</li>
+                            <li>Klik kanan tombol download → "Save link as..." untuk menyimpan file</li>
+                            <li>Atau buka link di tab baru jika download tidak berjalan</li>
+                            <li>Pastikan koneksi internet Anda stabil</li>
                         </ul>
                     </div>
                 `;
