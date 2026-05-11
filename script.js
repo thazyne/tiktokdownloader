@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (!tiktokData) throw new Error('Strukturnya aneh nih, coba lagi ya!');
 
                 if (currentFormat === 'mp4') {
-                    downloadUrl = tiktokData.hdplay || tiktokData.wmplay || tiktokData.play;
+                    downloadUrl = getCompatibleTikTokVideoUrl(tiktokData);
                     if (!downloadUrl) throw new Error('Gak ketemu link videonya nih!');
                 } else {
                     downloadUrl = tiktokData.music_info?.play;
@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', function () {
             triggerAutoDownload(downloadUrl, title);
         } catch (error) {
             console.error('Download error:', error);
-            showResult(`ERROR: ${error.message}`, 'error');
+            showError(error.message);
         } finally {
             loading.style.display = 'none';
             downloadBtn.disabled = false;
@@ -161,6 +161,8 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     async function triggerAutoDownload(downloadUrl, title) {
+        const safeTitle = sanitizeFilename(title);
+
         try {
             // Fetch file as blob agar browser langsung save (bukan open di tab baru)
             const response = await fetch(downloadUrl);
@@ -169,7 +171,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const a = document.createElement('a');
             a.href = blobUrl;
-            a.download = `${title}.${currentFormat}`;
+            a.download = `${safeTitle}.${currentFormat}`;
             a.style.display = 'none';
             document.body.appendChild(a);
             a.click();
@@ -182,7 +184,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Fallback: buka link langsung jika fetch blob gagal (misal CORS)
             const a = document.createElement('a');
             a.href = downloadUrl;
-            a.download = `${title}.${currentFormat}`;
+            a.download = `${safeTitle}.${currentFormat}`;
             a.target = '_blank';
             a.style.display = 'none';
             document.body.appendChild(a);
@@ -192,6 +194,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function showResult(downloadUrl, thumbnailUrl, title, statsHTML = '') {
+        const safeTitle = sanitizeFilename(title);
         const resultHTML = `
             <div class="media-card">
                 ${thumbnailUrl ? `<img src="${thumbnailUrl}" class="thumbnail" alt="Thumbnail">` : ''}
@@ -206,7 +209,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         <i class="fas fa-check-circle" style="color:#4ade80;"></i>
                         Download dimulai otomatis! Cek folder Downloads kamu.
                     </p>
-                    <a href="${downloadUrl}" class="download-link" download="${title}.${currentFormat}" target="_blank">
+                    <a href="${downloadUrl}" class="download-link" download="${safeTitle}.${currentFormat}" target="_blank">
                         <i class="fas fa-redo"></i> Download Ulang
                     </a>
                 </div>
@@ -226,6 +229,19 @@ document.addEventListener('DOMContentLoaded', function () {
         result.style.display = 'block';
     }
 
+    function showError(message) {
+        result.innerHTML = `
+            <div class="media-card">
+                <div class="media-info">
+                    <h3>Download gagal</h3>
+                    <p>${message}</p>
+                </div>
+            </div>
+        `;
+        result.className = 'result error';
+        result.style.display = 'block';
+    }
+
     function findDownloadUrl(data) {
         if (data?.url) return data.url;
         if (data?.result?.url) return data.result.url;
@@ -235,6 +251,11 @@ document.addEventListener('DOMContentLoaded', function () {
         if (data?.video?.url) return data.video.url;
         if (data?.audio?.url) return data.audio.url;
         return null;
+    }
+
+    function getCompatibleTikTokVideoUrl(tiktokData) {
+    
+        return tiktokData.play || tiktokData.wmplay || tiktokData.hdplay || null;
     }
 
     function isValidYouTubeUrl(url) {
@@ -252,5 +273,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function formatNumber(num) {
         return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function sanitizeFilename(name) {
+        return (name || 'download')
+            .replace(/[<>:"/\\|?*\x00-\x1F]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
     }
 });
